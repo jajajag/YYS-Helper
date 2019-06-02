@@ -127,3 +127,7 @@ win32api.SendMessage(hwnd, win32con.WM_LBUTTONUP, 0, l_param)
 time.sleep(1.5 + random.random() * 0.8)
 ```
 对句柄调用SendMessage，将鼠标移动到指定坐标，点击，随机设定延迟后释放。最后，设定随机延迟，来进行下一次点击。
+
+# 后记
+
+这里仅仅是分享一下自用的脚本。后面如果可以找到做放大镜和御魂导出的dalao是打开桌面版数据的方法，想做一下战斗AI的强化学习方面改进。
