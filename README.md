@@ -32,7 +32,35 @@ left, top, right, bottom = win32gui.GetClientRect(hwnd)
 width = right - left
 height = bottom - top
 ```
-首先，通过句柄来获得Client的宽度等，注意Client忽略了上方的控制栏。
+通过句柄来获得Client的宽度等，注意Client忽略了上方的控制栏。
+
+```
+# Create DCs
+hwndDC = win32gui.GetWindowDC(hwnd)
+mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+saveDC = mfcDC.CreateCompatibleDC()
+# Create Bit Map
+saveBitMap = win32ui.CreateBitmap()
+saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+saveDC.SelectObject(saveBitMap)
+# Save the screenshot
+saveDC.BitBlt((0, 0), (width, height), mfcDC, (0, 0), win32con.SRCCO    PY)
+bmpinfo = saveBitMap.GetInfo()
+bmpstr = saveBitMap.GetBitmapBits(True)
+# Save to image
+im = Image.frombuffer('RGB', (bmpinfo['bmWidth'], bmpinfo['bmHeight'    ]), 
+        bmpstr, 'raw', 'BGRX', 0, 1)
+screen = np.array(im)
+# Remove DCs
+win32gui.DeleteObject(saveBitMap.GetHandle())
+saveDC.DeleteDC()
+mfcDC.DeleteDC()
+win32gui.ReleaseDC(hwnd, hwndDC)
+```
+在这段代码中，我们先获得这个窗口的DC，然后创建一个BitMap来存储截图。这里参考了[Python Screenshot of inactive window PrintWindow + win32gui](https://stackoverflow.com/questions/19695214/python-screenshot-of-inactive-window-printwindow-win32gui)和[Python实现屏幕截图的两种方式](https://www.cnblogs.com/weiyinfu/p/8051280.html)。使用winapi截图的好处是，可以进行后台截图。之后将BitMap转化成ndarray，从而方便后面进行像素判断。释放资源。
+
+
+
 
 
 
