@@ -65,32 +65,34 @@ saveDC.DeleteDC()
 mfcDC.DeleteDC()
 win32gui.ReleaseDC(hwnd, hwndDC)
 ```
-在这段代码中，我们先获得这个窗口的DC，然后创建一个BitMap来存储截图。这里参考了[Python Screenshot of inactive window PrintWindow + win32gui](https://stackoverflow.com/questions/19695214/python-screenshot-of-inactive-window-printwindow-win32gui)和[Python实现屏幕截图的两种方式](https://www.cnblogs.com/weiyinfu/p/8051280.html)。使用winapi截图的好处是，可以进行后台截图。之后将BitMap转化成ndarray，从而方便后面进行像素判断。释放资源。
+在这段代码中，我们先获得这个窗口的DC，然后创建一个BitMap来存储截图。这里参考了[Python Screenshot of inactive window PrintWindow + win32gui](https://stackoverflow.com/questions/19695214/python-screenshot-of-inactive-window-printwindow-win32gui)和[Python实现屏幕截图的两种方式](https://www.cnblogs.com/weiyinfu/p/8051280.html)。使用winapi截图的好处是，可以进行后台截图(但不能最小化)。之后将BitMap转化成ndarray，从而方便后面进行像素判断。释放资源。
 
 ```
-# Search white pixels
+ # Search white pixels
 #for i in range(470):
 #    for j in range(850):
 #        #if screen[i][j][0] == 255 and screen[i][j][1] == 255 and screen[i][j][2] == 255:
 #        #if screen[i][j][0] == 0 and screen[i][j][1] == 0 and screen[i][j][2] == 0:
-#        if screen[i][j][0] == 150 and screen[i][j][1] == 141 and screen[i][j][2] == 131:
+#        if screen[i][j][0] == screen[400][487][0] \
+#                and screen[i][j][1] == screen[400][487][1] \
+#                and screen[i][j][2] == screen[400][487][2]:
 #            print(i, j)
 ```
-这段注释掉的部分，遍历所有的pixels，判断纯黑，纯白和某些特殊的颜色。比如，结算界面的buff中间有纯白，组队按钮中间有纯色(150, 141, 131)。从而我们可以提取具体像素点，来判断御魂进行到哪一步。
+这段注释掉的部分，遍历所有的pixels，判断纯黑，纯白和某些特殊的颜色。比如，结算界面的buff中间有纯白，组队时中间有红色(87, 68, 46)自动开始字样。从而我们可以提取具体像素点，来判断御魂进行到哪一步。
 
 ```
 # Click if the pixel is white
 if screen[468][148][0] == 255 and screen[468][148][1] == 255 and screen[468][148][2] == 255:
     x, y = rand_next(width, height)
 # Click the start button if in party
-elif screen[395][600][0] == 150 and screen[395][600][1] == 141 and screen[395][600][2] == 131:
+elif screen[400][487][0] == 87 and screen[400][487][1] == 68 and screen[400][487][2] == 46:
     x, y = rand_start(width, height)
 else:
     # Sleep for random time
     time.sleep(1.5 + random.random() * 0.8)
     continue
 ```
-这段判断具体像素点，如果是纯白，说明在结算界面；如果是(150, 141, 131)，说明在组队界面，分别点击可选的范围。否则，在战斗过程中，跳过。
+这段判断具体像素点，如果是纯白，说明在结算界面；如果是(87, 68, 46)，说明在组队界面，分别点击可选的范围。否则，在战斗过程中，跳过。
 
 ```
 # Generate random point of next click
