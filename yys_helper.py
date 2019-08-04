@@ -36,7 +36,7 @@ class YYS_Helper(object):
 
     def __del__(self):
         # Remove DCs
-        self.win32gui.DeleteObject(self.saveBitMap.GetHandle())
+        win32gui.DeleteObject(self.saveBitMap.GetHandle())
         self.saveDC.DeleteDC()
         self.mfcDC.DeleteDC()
         win32gui.ReleaseDC(self.hwnd, self.hwndDC)
