@@ -59,6 +59,7 @@ class YYS_Helper(object):
                     'x_range': [int(line[5]), int(line[6])],
                     'y_range': [int(line[7]), int(line[8])],
                     'sleep_time': float(line[9])
+                    'verbose': True if len(line) > 10 else False
                 }
             except:
                 # If the format is not fit
@@ -75,6 +76,9 @@ class YYS_Helper(object):
         # Count the number of satisfied points
         counter = 1
         for config in self.configs:
+            # Print out the pixel if verbose is true
+            if config['verbose']:
+                print(screen[config['y']][config['x']])
             # If we find the screen_shot satisfies the criterion
             if (screen[config['y']][config['x']] == config['rgb']).all():
                 # Everytime  we have 1 / counter chance to pick the new random,
