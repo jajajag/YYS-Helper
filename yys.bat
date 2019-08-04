@@ -1,3 +1,3 @@
 cd "C:\Users\zzzsg\Linux"
 C:
-python helper.py
+python yys_helper.py
