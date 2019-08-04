@@ -43,7 +43,7 @@ class YYS_Helper(object):
 
     def read_file(self, config_file):
         configs = []
-        with open(config_file, 'r') as fp:
+        with open(config_file, 'rb') as fp:
             lines = fp.readlines()
         for line in lines:
             try:
@@ -64,6 +64,7 @@ class YYS_Helper(object):
                 # If the format is not fit
                 continue
             configs.append(config)
+        return configs
 
     # Generate random point of next click and sleeping time
     def rand_point(self, screen):
