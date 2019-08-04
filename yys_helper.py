@@ -79,7 +79,7 @@ class YYS_Helper(object):
                 # Everytime  we have 1 / counter chance to pick the new random,
                 # point. Thus, the probability of taking one point among all
                 # possible points are equal (1 / n).
-                if random.random() < 1.0 / counter
+                if random.random() < 1.0 / counter:
                     x = random.randint(*config['x_range'])
                     y = random.randint(*config['y_range'])
                     sleep_time = config['sleep_time'] + random.random()
