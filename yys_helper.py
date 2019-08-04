@@ -58,7 +58,7 @@ class YYS_Helper(object):
                     'rgb': [int(line[2]), int(line[3]), int(line[4])],
                     'x_range': [int(line[5]), int(line[6])],
                     'y_range': [int(line[7]), int(line[8])],
-                    'sleep_time': float(line[9])
+                    'sleep_time': float(line[9]),
                     'verbose': True if len(line) > 10 else False
                 }
             except:
