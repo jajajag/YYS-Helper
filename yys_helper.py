@@ -33,6 +33,8 @@ class YYS_Helper(object):
         # Get the input for total running time
         print("运行时间：", end="")
         self.end_time = time.time() + float(input())
+        # Current position of the configuration
+        self.pos = -1
 
     def __del__(self):
         # Remove DCs
@@ -71,24 +73,27 @@ class YYS_Helper(object):
     def rand_point(self, screen):
         # Assign properties
         height, width, _ = screen.shape
-        x, y = None, None
+        x, y, n = None, None, len(self.configs)
         sleep_time = 1.5
-        # Count the number of satisfied points
-        counter = 1
-        for config in self.configs:
+        # Everytime  we have 1 / counter chance to pick the new random, point.
+        # Thus, the probability of taking one point among all possible points
+        # are equal (1 / n).
+        # if random.random() < 1.0 / counter:
+        # Now we use a rr algorithm instead of probability.
+        for pos in range(n):
+            pos = (pos + self.pos) % n
             # Print out the pixel if verbose is true
-            if config['verbose']:
-                print(screen[config['y']][config['x']])
+            if self.configs[pos]['verbose']:
+                print(screen[self.configs[pos]['y']][self.configs[pos]['x']])
             # If we find the screen_shot satisfies the criterion
-            if (screen[config['y']][config['x']] == config['rgb']).all():
-                # Everytime  we have 1 / counter chance to pick the new random,
-                # point. Thus, the probability of taking one point among all
-                # possible points are equal (1 / n).
-                if random.random() < 1.0 / counter:
-                    x = random.randint(*config['x_range'])
-                    y = random.randint(*config['y_range'])
-                    sleep_time = config['sleep_time'] + random.random()
-                counter += 1
+            if (screen[self.configs[pos]['y']][
+                self.configs[pos]['x']] == self.configs[pos]['rgb']).all():
+                x = random.randint(*self.configs[pos]['x_range'])
+                y = random.randint(*self.configs[pos]['y_range'])
+                sleep_time = self.configs[0]['sleep_time'] + random.random()
+                # Update the current position to the next config
+                self.pos = (pos + 1) % n
+                break
 
         return x, y, sleep_time
 
