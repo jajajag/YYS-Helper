@@ -2,6 +2,7 @@
 import numpy as np
 import win32gui, win32con, win32api, win32ui
 import time, random, sys
+from collections import defaultdict
 from ctypes import windll
 from PIL import Image
 
@@ -33,8 +34,6 @@ class YYS_Helper(object):
         # Get the input for total running time
         print("运行时间：", end="")
         self.end_time = time.time() + float(input())
-        # Current position of the configuration
-        self.pos = -1
 
     def __del__(self):
         # Remove DCs
@@ -44,7 +43,7 @@ class YYS_Helper(object):
         win32gui.ReleaseDC(self.hwnd, self.hwndDC)
 
     def read_file(self, config_file):
-        configs = []
+        configs = {}
         with open(config_file, 'rb') as fp:
             lines = fp.readlines()
         for line in lines:
@@ -53,20 +52,25 @@ class YYS_Helper(object):
                 # Comments start with #
                 if line[0][0] == '#':
                     continue
+                # configs = {xy : {rgb : [n, config1, config2, ...]}}
+                xy = tuple([int(i) for i in line[:2]])
+                rgb = tuple([int(i) for i in line[2:5]])
+                if xy not in configs:
+                    configs[xy] = {}
+                if rgb not in configs[xy]:
+                    # The first element in the list is the current position
+                    configs[xy][rgb] = [0]
                 # Read configuration from the line
                 config = {
-                    'x': int(line[0]),
-                    'y': int(line[1]),
-                    'rgb': [int(line[2]), int(line[3]), int(line[4])],
                     'x_range': [int(line[5]), int(line[6])],
                     'y_range': [int(line[7]), int(line[8])],
                     'sleep_time': float(line[9]),
-                    'verbose': True if len(line) > 10 else False
+                    # 'verbose': True if len(line) > 10 else False
                 }
+                configs[xy][rgb].append(config)
             except:
                 # If the format is not fit
                 continue
-            configs.append(config)
         return configs
 
     # Generate random point of next click and sleeping time
@@ -80,20 +84,25 @@ class YYS_Helper(object):
         # are equal (1 / n).
         # if random.random() < 1.0 / counter:
         # Now we use a rr algorithm instead of probability.
-        for pos in range(n):
-            pos = (pos + self.pos) % n
+        for xy in self.configs:
+            rgb = screen[xy[1]][xy[0]]
             # Print out the pixel if verbose is true
-            if self.configs[pos]['verbose']:
-                print(screen[self.configs[pos]['y']][self.configs[pos]['x']])
-            # If we find the screen_shot satisfies the criterion
-            if (screen[self.configs[pos]['y']][
-                self.configs[pos]['x']] == self.configs[pos]['rgb']).all():
-                x = random.randint(*self.configs[pos]['x_range'])
-                y = random.randint(*self.configs[pos]['y_range'])
-                sleep_time = self.configs[0]['sleep_time'] + random.random()
+            # Here we assume three rgb value is (-1, -1, -1)
+            if (-1, -1, -1) in self.configs[xy]:
+                print(rgb)
+            # If the key rgb is in configs[xy], we will iteratively find
+            # the config in the list. Thus, the pixel with same coordinate
+            # and same rgb value will have equal chance to choose different
+            # random area.
+            if rgb in self.configs[xy]:
+                pos = self.configs[xy][rgb][0]
+                x = random.randint(*self.configs[xy][rgb][pos]['x_range'])
+                y = random.randint(*self.configs[xy][rgb][pos]['y_range'])
+                sleep_time = self.configs[xy][rgb][pos][
+                        'sleep_time'] + random.random()
                 # Update the current position to the next config
-                self.pos = (pos + 1) % n
-                break
+                self.configs[xy][rgb][0] = (self.configs[xy][rgb][
+                    0] + 1) % len(self.configs[xy][rgb])
 
         return x, y, sleep_time
 
