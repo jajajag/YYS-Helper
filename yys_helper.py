@@ -99,7 +99,7 @@ class YYS_Helper(object):
                 x = random.randint(*self.configs[xy][rgb][pos]['x_range'])
                 y = random.randint(*self.configs[xy][rgb][pos]['y_range'])
                 sleep_time = self.configs[xy][rgb][pos][
-                        'sleep_time'] + random.random()
+                        'sleep_time'] + random.random() * 0.5
                 # Update the current position to the next config
                 self.configs[xy][rgb][0] = pos % (len(
                         self.configs[xy][rgb]) - 1) + 1
