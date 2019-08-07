@@ -59,7 +59,7 @@ class YYS_Helper(object):
                     configs[xy] = {}
                 if rgb not in configs[xy]:
                     # The first element in the list is the current position
-                    configs[xy][rgb] = [0]
+                    configs[xy][rgb] = [1]
                 # Read configuration from the line
                 config = {
                     'x_range': [int(line[5]), int(line[6])],
@@ -101,8 +101,8 @@ class YYS_Helper(object):
                 sleep_time = self.configs[xy][rgb][pos][
                         'sleep_time'] + random.random()
                 # Update the current position to the next config
-                self.configs[xy][rgb][0] = (self.configs[xy][rgb][
-                    0] + 1) % len(self.configs[xy][rgb])
+                self.configs[xy][rgb][0] = self.configs[
+                        xy][rgb][0] % len(self.configs[xy][rgb]) + 1
 
         return x, y, sleep_time
 
