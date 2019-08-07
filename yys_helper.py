@@ -85,7 +85,7 @@ class YYS_Helper(object):
         # if random.random() < 1.0 / counter:
         # Now we use a rr algorithm instead of probability.
         for xy in self.configs:
-            rgb = screen[xy[1]][xy[0]]
+            rgb = tuple(screen[xy[1]][xy[0]])
             # Print out the pixel if verbose is true
             # Here we assume three rgb value is (-1, -1, -1)
             if (-1, -1, -1) in self.configs[xy]:
