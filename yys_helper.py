@@ -81,7 +81,7 @@ class YYS_Helper(object):
         # Assign properties
         height, width, _ = screen.shape
         x, y, n = None, None, len(self.configs)
-        sleep_time, count = 1.5, 0
+        sleep_time, battle_count = 1.5, 0
         # Everytime  we have 1 / counter chance to pick the new random, point.
         # Thus, the probability of taking one point among all possible points
         # are equal (1 / n).
