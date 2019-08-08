@@ -32,8 +32,10 @@ class YYS_Helper(object):
         # Initialize configuration for target pixel and clicking area
         self.configs = self.read_file(config_file)
         # Get the input for total running time
-        print("运行时间：", end="")
-        self.end_time = time.time() + float(input())
+        print("运行次数：", end="")
+        #self.end_time = time.time() + float(input())
+        # The total running times. The value should be positive
+        self.battle_count = int(input())
 
     def __del__(self):
         # Remove DCs
@@ -65,6 +67,7 @@ class YYS_Helper(object):
                     'x_range': [int(line[5]), int(line[6])],
                     'y_range': [int(line[7]), int(line[8])],
                     'sleep_time': float(line[9]),
+                    'battle_count': int(line[10]),
                     # 'verbose': True if len(line) > 10 else False
                 }
                 configs[xy][rgb].append(config)
@@ -78,7 +81,7 @@ class YYS_Helper(object):
         # Assign properties
         height, width, _ = screen.shape
         x, y, n = None, None, len(self.configs)
-        sleep_time = 1.5
+        sleep_time, count = 1.5, 0
         # Everytime  we have 1 / counter chance to pick the new random, point.
         # Thus, the probability of taking one point among all possible points
         # are equal (1 / n).
@@ -100,11 +103,14 @@ class YYS_Helper(object):
                 y = random.randint(*self.configs[xy][rgb][pos]['y_range'])
                 sleep_time = self.configs[xy][rgb][pos][
                         'sleep_time'] + random.random() * 0.5
+                # Count the number of battles. End of battle should be 1.
+                # Fail of a battle should have count 0.
+                battle_count = self.configs[xy][rgb][pos]['battle_count']
                 # Update the current position to the next config
                 self.configs[xy][rgb][0] = pos % (len(
                         self.configs[xy][rgb]) - 1) + 1
 
-        return x, y, sleep_time
+        return x, y, sleep_time, battle_count
 
     def screenshot(self):
         # Save the screenshot
@@ -118,7 +124,7 @@ class YYS_Helper(object):
         screen = np.array(im)
         
         # Generate random point and sleep_time from the screenshot
-        x, y, sleep_time = self.rand_point(screen)
+        x, y, sleep_time, battle_count = self.rand_point(screen)
         if x != None:
             l_param = win32api.MAKELONG(x, y)
             win32api.SendMessage(self.hwnd, win32con.WM_MOUSEMOVE, 0, l_param)
@@ -131,10 +137,12 @@ class YYS_Helper(object):
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
+        self.battle_count -= battle_count
 
     def run(self):
         # Run the main function
-        while time.time() < self.end_time:
+        #while time.time() < self.end_time:
+        while self.battle_count > 0:
             self.screenshot()
 
 if __name__ == '__main__':
