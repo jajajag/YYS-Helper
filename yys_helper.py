@@ -36,7 +36,7 @@ class YYS_Helper(object):
         print("运行次数：", end="")
         #self.end_time = time.time() + float(input())
         # Initialize progressing bar with the total running times
-        self.pbar = tqdm(total=int(input()))
+        self.pbar = tqdm(total=int(input()), ascii=True)
 
     def __del__(self):
         self.pbar.close()
