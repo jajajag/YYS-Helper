@@ -135,7 +135,6 @@ class YYS_Helper(object):
             win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONDOWN, 0, l_param)
             time.sleep(0.01 + random.random() * 0.02)
             win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONUP, 0, l_param)
-            print(".", end="")
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
