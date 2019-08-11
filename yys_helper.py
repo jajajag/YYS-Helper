@@ -34,9 +34,9 @@ class YYS_Helper(object):
         self.configs = self.read_file(config_file)
         # Get the input for total running time
         print("运行次数：", end="")
-        #self.end_time = time.time() + float(input())
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=int(input()), ascii=True)
+        self.battle_count = 0
 
     def __del__(self):
         self.pbar.close()
@@ -138,12 +138,16 @@ class YYS_Helper(object):
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
-        self.pbar.update(battle_count)
+        self.battle_count += battle_count
+        # It is a tqdm bug in windows. The update value in windows cannot be
+        # negative.
+        if self.battle_count >= self.pbar.n:
+            self.pbar.update(battle_count)
 
     def run(self):
         # Run the main function
         #while time.time() < self.end_time:
-        while self.pbar.n < self.pbar.total:
+        while self.battle_count < self.pbar.total:
             self.screenshot()
 
 if __name__ == '__main__':
