@@ -5,6 +5,7 @@ import time, random, sys
 from collections import defaultdict
 from ctypes import windll
 from PIL import Image
+from tqdm import tqdm
 
 class YYS_Helper(object):
     def __init__(self,
@@ -34,10 +35,11 @@ class YYS_Helper(object):
         # Get the input for total running time
         print("运行次数：", end="")
         #self.end_time = time.time() + float(input())
-        # The total running times. The value should be positive
-        self.battle_count = int(input())
+        # Initialize progressing bar with the total running times
+        self.pbar = tqdm(total=int(input()))
 
     def __del__(self):
+        self.pbar.close()
         # Remove DCs
         win32gui.DeleteObject(self.saveBitMap.GetHandle())
         self.saveDC.DeleteDC()
@@ -137,12 +139,12 @@ class YYS_Helper(object):
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
-        self.battle_count -= battle_count
+        self.pbar.update(battle_count)
 
     def run(self):
         # Run the main function
         #while time.time() < self.end_time:
-        while self.battle_count > 0:
+        while self.pbar.n < self.pbar.total:
             self.screenshot()
 
 if __name__ == '__main__':
