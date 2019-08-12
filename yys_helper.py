@@ -36,7 +36,7 @@ class YYS_Helper(object):
         print("运行次数：", end="")
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=int(input()), ascii=True)
-        self.battle_count = 0
+        self.last_pixel = ((-1, -1), (-1, -1, -1))
 
     def __del__(self):
         self.pbar.close()
@@ -84,6 +84,7 @@ class YYS_Helper(object):
         height, width, _ = screen.shape
         x, y, n = None, None, len(self.configs)
         sleep_time, battle_count = 1.5, 0
+        update = True
         # Everytime  we have 1 / counter chance to pick the new random, point.
         # Thus, the probability of taking one point among all possible points
         # are equal (1 / n).
@@ -111,8 +112,12 @@ class YYS_Helper(object):
                 # Update the current position to the next config
                 self.configs[xy][rgb][0] = pos % (len(
                         self.configs[xy][rgb]) - 1) + 1
+                # Do not update if the pixel is the same with last pixel.
+                if (xy, rgb) == self.last_pixel:
+                    update = False
+                self.last_pixel = (xy, rgb)
 
-        return x, y, sleep_time, battle_count
+        return x, y, sleep_time, battle_count, update
 
     def screenshot(self):
         # Save the screenshot
@@ -126,7 +131,7 @@ class YYS_Helper(object):
         screen = np.array(im)
         
         # Generate random point and sleep_time from the screenshot
-        x, y, sleep_time, battle_count = self.rand_point(screen)
+        x, y, sleep_time, battle_count, update = self.rand_point(screen)
         if x != None:
             l_param = win32api.MAKELONG(x, y)
             win32api.SendMessage(self.hwnd, win32con.WM_MOUSEMOVE, 0, l_param)
@@ -138,16 +143,15 @@ class YYS_Helper(object):
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
-        self.battle_count += battle_count
         # It is a tqdm bug in windows. The update value in windows cannot be
         # negative.
-        if self.battle_count >= self.pbar.n:
+        if update:
             self.pbar.update(battle_count)
 
     def run(self):
         # Run the main function
         #while time.time() < self.end_time:
-        while self.battle_count < self.pbar.total:
+        while self.pbar.n < self.pbar.total:
             self.screenshot()
 
 if __name__ == '__main__':
