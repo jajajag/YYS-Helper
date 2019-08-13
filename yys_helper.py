@@ -36,7 +36,7 @@ class YYS_Helper(object):
         print("运行次数：", end="")
         # Initialize progressing bar with the total running times
         self.pbar = tqdm(total=int(input()), ascii=True)
-        self.last_pixel = ((-1, -1), (-1, -1, -1))
+        self.pbar_time = 0
 
     def __del__(self):
         self.pbar.close()
@@ -84,7 +84,6 @@ class YYS_Helper(object):
         height, width, _ = screen.shape
         x, y, n = None, None, len(self.configs)
         sleep_time, battle_count = 1.5, 0
-        update = True
         # Everytime  we have 1 / counter chance to pick the new random, point.
         # Thus, the probability of taking one point among all possible points
         # are equal (1 / n).
@@ -112,12 +111,8 @@ class YYS_Helper(object):
                 # Update the current position to the next config
                 self.configs[xy][rgb][0] = pos % (len(
                         self.configs[xy][rgb]) - 1) + 1
-                # Do not update if the pixel is the same with last pixel.
-                if (xy, rgb) == self.last_pixel:
-                    update = False
-                self.last_pixel = (xy, rgb)
 
-        return x, y, sleep_time, battle_count, update
+        return x, y, sleep_time, battle_count
 
     def screenshot(self):
         # Save the screenshot
@@ -143,10 +138,11 @@ class YYS_Helper(object):
             sys.stdout.flush()
         # Sleep for random time
         time.sleep(sleep_time)
-        # It is a tqdm bug in windows. The update value in windows cannot be
-        # negative.
-        if update:
+        # tqdm update cannot take negative input in windows
+        # Every two update cannot be within 10s (to detect end of battle)
+        if battle_count > 0 and time.time() - self.pbar_time > 10:
             self.pbar.update(battle_count)
+            self.pbar_time = time.time()
 
     def run(self):
         # Run the main function
