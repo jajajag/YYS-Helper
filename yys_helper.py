@@ -126,7 +126,7 @@ class YYS_Helper(object):
         screen = np.array(im)
         
         # Generate random point and sleep_time from the screenshot
-        x, y, sleep_time, battle_count, update = self.rand_point(screen)
+        x, y, sleep_time, battle_count = self.rand_point(screen)
         if x != None:
             l_param = win32api.MAKELONG(x, y)
             win32api.SendMessage(self.hwnd, win32con.WM_MOUSEMOVE, 0, l_param)
