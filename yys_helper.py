@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 class YYS_Helper(object):
     def __init__(self,
-            config_file='config.txt',
+            config_file='configs/config.txt',
             num_runs=100,
             class_name="Win32Window0",
             title_name="阴阳师-网易游戏"):
@@ -34,7 +34,7 @@ class YYS_Helper(object):
         # Initialize configuration for target pixel and clicking area
         print("配置文件config_xxx.txt(默认%s，输入xxx)：" % config_file, end="")
         config_file_input = input()
-        config_file = "config_" + config_file_input + ".txt" \
+        config_file = "configs/config_" + config_file_input + ".txt" \
                 if config_file_input != "" else config_file
         self.configs = self.read_file(config_file)
 
