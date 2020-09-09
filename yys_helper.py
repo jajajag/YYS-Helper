@@ -11,7 +11,9 @@ class YYS_Helper(object):
     def __init__(self,
             config_file='configs/config.txt',
             num_runs=100,
-            class_name="Win32Window0",
+            #class_name="Win32Window0",
+            # 新引擎中类名为Win32Window
+            class_name="Win32Window",
             title_name="阴阳师-网易游戏"):
         # Find the hwnd of the window
         self.hwnd = win32gui.FindWindow(class_name, title_name)
