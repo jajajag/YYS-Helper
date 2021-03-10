@@ -101,13 +101,21 @@ class YYS_Helper(object):
         # Now we use a rr algorithm instead of probability.
         for xy in self.configs:
 
-            with open("temp.txt", "r") as fp:
-                lines = fp.readlines()
-            ls = [(int(i.split()[0]), int(i.split()[1])) for i in lines]
+            # Save all the pixel with rgb = (255, 255, 255)
             lss = []
-            for line in ls:
-                if tuple(screen[line[1]][line[0]]) == (255, 255, 255):
-                    lss.append(str(line[0]) + " " + str(line[1]) + "\n")
+            try:
+                with open("temp.txt", "r") as fp:
+                    lines = fp.readlines()
+                ls = [(int(i.split()[0]), int(i.split()[1])) for i in lines]
+                for line in ls:
+                    if tuple(screen[line[1]][line[0]]) == (255, 255, 255):
+                        lss.append(str(line[0]) + " " + str(line[1]) + "\n")
+            except:
+                # If temp.txt does not exist
+                for y in range(len(screen)):
+                    for x in range(len(screen[0])):
+                        if tuple(screen[y][x]) == (255, 255, 255):
+                            lss.append(str(x) + " " + str(y) + "\n")
             print(" ".join(lss))
             with open("temp.txt", "w") as fp:
                 fp.writelines(lss)
