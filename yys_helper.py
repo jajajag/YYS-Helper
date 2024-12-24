@@ -19,7 +19,9 @@ class YYS_Helper(object):
         self.hwnd = win32gui.FindWindow(class_name, title_name)
         # Set the program to forground
         #win32gui.SetForegroundWindow(hwnd)
-        left, top, right, bottom = win32gui.GetClientRect(self.hwnd)
+        #left, top, right, bottom = win32gui.GetClientRect(self.hwnd)
+        # JAG: 改截整个窗口
+        left, top, right, bottom = win32gui.GetWindowRect(self.hwnd)
         # Calculat the size of the window
         self.width = right - left
         self.height = bottom - top
@@ -126,8 +128,13 @@ class YYS_Helper(object):
 
     def screenshot(self):
         # Save the screenshot
-        self.saveDC.BitBlt((0, 0), (self.width, self.height), self.mfcDC,
-                (0, 0), win32con.SRCCOPY)
+        #self.saveDC.BitBlt((0, 0), (self.width, self.height), self.mfcDC,
+        #        (0, 0), win32con.SRCCOPY)
+        # BitBlt失效了，改用PrintWindow
+        windll.user32.PrintWindow(self.hwnd, self.saveDC.GetSafeHdc(), 0x2)
+        # JAG: 如果多于一个参数，保存截图
+        if len(sys.argv) > 1:
+            self.saveBitMap.SaveBitmapFile(self.saveDC, 'screenshot.bmp')
         bmpinfo = self.saveBitMap.GetInfo()
         bmpstr = self.saveBitMap.GetBitmapBits(True)
         # Save to image
