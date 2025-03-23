@@ -73,58 +73,49 @@ class YYS_Helper(object):
                 rgb = tuple([int(i) for i in line[2:5]])
                 if xy not in configs:
                     configs[xy] = {}
-                if rgb not in configs[xy]:
-                    # The first element in the list is the current position
-                    configs[xy][rgb] = [1]
+                    configs[xy][rgb] = []
                 # Read configuration from the line
                 config = {
                     'x_range': [int(line[5]), int(line[6])],
                     'y_range': [int(line[7]), int(line[8])],
                     'sleep_time': float(line[9]),
                     'battle_count': int(line[10]),
-                    # 'verbose': True if len(line) > 10 else False
+                    'scope': int(line[11]),
                 }
                 configs[xy][rgb].append(config)
             except:
-                # If the format is not fit
+                # If the format does not match
                 continue
         return configs
 
     # Generate random point of next click and sleeping time
-    def rand_point(self, screen):
-        # Assign properties
-        height, width, _ = screen.shape
-        x, y, n = None, None, len(self.configs)
-        sleep_time, battle_count = 1.5, 0
-        # Everytime  we have 1 / counter chance to pick the new random, point.
-        # Thus, the probability of taking one point among all possible points
-        # are equal (1 / n).
-        # if random.random() < 1.0 / counter:
-        # Now we use a rr algorithm instead of probability.
+    def rand_points(self, screen):
+        # Initialize two lists
+        scope_list, rand_list = [], []
+        # Iterate through all the target pixels
         for xy in self.configs:
             rgb = tuple(screen[xy[1]][xy[0]])
-            # Print out the pixel if verbose is true
-            # Here we assume three rgb value is (-1, -1, -1)
+            # Print out the pixel if the rgb value is (-1, -1, -1)
             if (-1, -1, -1) in self.configs[xy]:
                 print(rgb)
-            # If the key rgb is in configs[xy], we will iteratively find
-            # the config in the list. Thus, the pixel with same coordinate
-            # and same rgb value will have equal chance to choose different
-            # random area.
+            # If the rgb value matches the target pixel
             if rgb in self.configs[xy]:
-                pos = self.configs[xy][rgb][0]
-                x = random.randint(*self.configs[xy][rgb][pos]['x_range'])
-                y = random.randint(*self.configs[xy][rgb][pos]['y_range'])
-                sleep_time = self.configs[xy][rgb][pos][
-                        'sleep_time'] + random.random() * 0.5
-                # Count the number of battles. End of battle should be 1.
-                # Fail of a battle should have count 0.
-                battle_count = self.configs[xy][rgb][pos]['battle_count']
-                # Update the current position to the next config
-                self.configs[xy][rgb][0] = pos % (len(
-                        self.configs[xy][rgb]) - 1) + 1
+                for point in self.configs[xy][rgb]:
+                    x = random.randint(*point['x_range'])
+                    y = random.randint(*point['y_range'])
+                    sleep_time = point['sleep_time'] + random.random() * 0.5
+                    # Count the number of battles. End of battle should be 1.
+                    battle_count = point['battle_count']
+                    # Always click the scope pixel
+                    # JAG: 方便斗技开自动接绿标
+                    if point['scope'] == 1:
+                        scope_list.append((x, y, sleep_time, battle_count))
+                    # Randomly click one random pixel
+                    else:
+                        rand_list.append((x, y, sleep_time, battle_count))
 
-        return x, y, sleep_time, battle_count
+        # Randomly click one pixel if no scope pixel is found
+        return scope_list + ([random.choice(rand_list)] if rand_list else [])
 
     def screenshot(self):
         # Save the screenshot
@@ -142,24 +133,30 @@ class YYS_Helper(object):
                 bmpstr, 'raw', 'BGRX', 0, 1)
         screen = np.array(im)
         
-        # Generate random point and sleep_time from the screenshot
-        x, y, sleep_time, battle_count = self.rand_point(screen)
-        if x != None:
-            l_param = win32api.MAKELONG(x, y)
-            win32api.SendMessage(self.hwnd, win32con.WM_MOUSEMOVE, 0, l_param)
-            #win32api.SendMessage(hwnd, win32con.WM_LBUTTONDOWN,
-            #        win32con.MK_LBUTTON, l_param)
-            win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONDOWN, 0, l_param)
-            time.sleep(0.01 + random.random() * 0.02)
-            win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONUP, 0, l_param)
-            sys.stdout.flush()
-        # Sleep for random time
-        time.sleep(sleep_time)
-        # tqdm update cannot take negative input in windows
-        # Every two update cannot be within 10s (to detect end of battle)
-        if battle_count > 0 and time.time() - self.pbar_time > 10:
-            self.pbar.update(battle_count)
-            self.pbar_time = time.time()
+        # Generate random points to click
+        points = self.rand_points(screen)
+        # Click the points
+        for point in points:
+            x, y, sleep_time, battle_count = point
+            if x != None:
+                l_param = win32api.MAKELONG(x, y)
+                win32api.SendMessage(self.hwnd, win32con.WM_MOUSEMOVE, 0,
+                                     l_param)
+                #win32api.SendMessage(hwnd, win32con.WM_LBUTTONDOWN,
+                #        win32con.MK_LBUTTON, l_param)
+                win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONDOWN, 0,
+                                     l_param)
+                time.sleep(0.01 + random.random() * 0.02)
+                win32api.SendMessage(self.hwnd, win32con.WM_LBUTTONUP, 0,
+                                     l_param)
+                sys.stdout.flush()
+            # Sleep for random time
+            time.sleep(sleep_time)
+            # tqdm update cannot take negative input in windows
+            # Every two update cannot be within 10s (to detect end of battle)
+            if battle_count > 0 and time.time() - self.pbar_time > 10:
+                self.pbar.update(battle_count)
+                self.pbar_time = time.time()
 
     def run(self):
         # Run the main function

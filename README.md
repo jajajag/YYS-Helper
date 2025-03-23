@@ -25,6 +25,10 @@
 * 多于一个参数（argv）时，保存截图为screenshot.bmp
 * 截图方法改为PrintWindow
 
+2025.03.22 更新：
+* config增加一列scope，当scope为1时，同一个pixel有多个匹配时顺序执行
+* 例如斗技中将开自动后再绿标右一，scope为0时为随机选择一个点击
+
 注：我使用的客户端分辨率非默认值，config.txt需进行调整，不在此进行提供！
 
 # 展示
