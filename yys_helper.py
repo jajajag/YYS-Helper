@@ -73,6 +73,7 @@ class YYS_Helper(object):
                 rgb = tuple([int(i) for i in line[2:5]])
                 if xy not in configs:
                     configs[xy] = {}
+                if rgb not in configs[xy]:
                     configs[xy][rgb] = []
                 # Read configuration from the line
                 config = {
